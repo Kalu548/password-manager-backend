@@ -1,7 +1,7 @@
 from functools import wraps
 
 import jwt
-import MySQLdb
+import mysql.connector as mysql
 from flask import Flask, g, jsonify, request
 from flask_cors import CORS
 
@@ -11,17 +11,12 @@ JWT_SECRET = "dahkdh2ui82ry7wfyudshsdi7utrdfhg6ytefdfghui84reto8i765te"
 app = Flask(__name__)
 
 CORS(app)
-conn = MySQLdb.connect(
+conn = mysql.connect(
     host="aws.connect.psdb.cloud",
     user="qh5j4ekbe67hfjd88r9g",
     password="pscale_pw_Oe8Fsu7KiuE0TGmBIPdXKBwgqsshtUd8WLveBeAJJ7P",
     database="password-manager",
-    autocommit=True,
-    ssl_mode="VERIFY_IDENTITY",
-    ssl={
-        'ca': "/etc/ssl/certs/ca-certificates.crt"
-    }
-
+    ssl_ca="/etc/ssl/cert.pem"
 )
 
 
@@ -182,4 +177,4 @@ def update_password():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=8000)

@@ -1,11 +1,6 @@
 # Use a base image with Python and necessary dependencies
 FROM python:3.9
 
-# Install the required Linux libraries
-RUN apt-get update && apt-get install -y \
-    default-libmysqlclient-dev \
-    build-essential
-
 # Set the working directory in the container
 WORKDIR /app
 

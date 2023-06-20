@@ -3,7 +3,7 @@ import json
 
 import bcrypt
 import jwt
-from MySQLdb import IntegrityError
+from mysql.connector import IntegrityError
 from nanoid import generate
 
 JWT_SECRET = "dahkdh2ui82ry7wfyudshsdi7utrdfhg6ytefdfghui84reto8i765te"
