@@ -1,16 +1,25 @@
-# Use a base image with Python and necessary dependencies
-FROM python:3.9
+# Stage 1: Build the application
+FROM python:3.9 as builder
 
-# Set the working directory in the container
+# Set the working directory in the builder stage
 WORKDIR /app
 
-# Copy the requirements file to the container
+# Copy only the requirements file to the builder stage
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Copy the Flask app code to the container
+# Stage 2: Create the final image
+FROM python:3.9-slim
+
+# Set the working directory in the final image
+WORKDIR /app
+
+# Copy the installed Python dependencies from the builder stage
+COPY --from=builder /install /usr/local
+
+# Copy the Flask app code to the final image
 COPY . .
 
 # Expose the port your Flask app will be running on

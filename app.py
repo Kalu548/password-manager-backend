@@ -11,13 +11,13 @@ JWT_SECRET = "dahkdh2ui82ry7wfyudshsdi7utrdfhg6ytefdfghui84reto8i765te"
 app = Flask(__name__)
 
 CORS(app)
-conn = mysql.connect(
+conn = mysql.pooling.MySQLConnectionPool(
     host="aws.connect.psdb.cloud",
     user="qh5j4ekbe67hfjd88r9g",
     password="pscale_pw_Oe8Fsu7KiuE0TGmBIPdXKBwgqsshtUd8WLveBeAJJ7P",
     database="password-manager",
     ssl_ca="/etc/ssl/cert.pem"
-)
+).get_connection()
 
 
 def token_required(f):
