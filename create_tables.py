@@ -26,7 +26,7 @@ def create_table():
     password_table = """
     CREATE TABLE IF NOT EXISTS passwords (
         `id` VARCHAR(255) NOT NULL PRIMARY KEY UNIQUE,
-        `name` VARCHAR(255)  NOT NULL UNIQUE,
+        `name` VARCHAR(255)  NOT NULL,
         `username` VARCHAR(255)  NOT NULL,
         `password` text NOT NULL,
         `url` text NOT NULL,

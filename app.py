@@ -1,23 +1,27 @@
+import os
 from functools import wraps
 
 import jwt
 import mysql.connector as mysql
+from dotenv import load_dotenv
 from flask import Flask, g, jsonify, request
 from flask_cors import CORS
 
 import data_utils
 
-JWT_SECRET = "dahkdh2ui82ry7wfyudshsdi7utrdfhg6ytefdfghui84reto8i765te"
+load_dotenv()
+
+JWT_SECRET = os.getenv("JWT_SECRET")
 app = Flask(__name__)
 
 CORS(app)
-conn = mysql.pooling.MySQLConnectionPool(
-    host="aws.connect.psdb.cloud",
-    user="qh5j4ekbe67hfjd88r9g",
-    password="pscale_pw_Oe8Fsu7KiuE0TGmBIPdXKBwgqsshtUd8WLveBeAJJ7P",
-    database="password-manager",
+connPool = mysql.pooling.MySQLConnectionPool(
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME"),
     ssl_ca="/etc/ssl/cert.pem"
-).get_connection()
+)
 
 
 def token_required(f):
@@ -63,6 +67,7 @@ def create_user():
         "password": data["password"],
         "email": data["email"]
     }
+    conn = connPool.get_connection()
     response = data_utils.create_user(data, conn)
     return jsonify(response)
 
@@ -77,7 +82,7 @@ def master_key():
             "status": "error",
             "response": "Please provide all the required fields"
         }), 400
-
+    conn = connPool.get_connection()
     response = data_utils.update_master_key(
         data["master_key"], g.decoded_token["id"], conn)
     return jsonify(response)
@@ -98,6 +103,7 @@ def login_user():
         "password": data["password"],
         "master_key": data["master_key"]
     }
+    conn = connPool.get_connection()
     response = data_utils.login_user(data, conn)
     return jsonify(response)
 
@@ -119,6 +125,7 @@ def create_password():
         "url": data["url"],
         "user_id": g.decoded_token["id"]
     }
+    conn = connPool.get_connection()
     response = data_utils.create_password(data, conn)
     return jsonify(response)
 
@@ -126,6 +133,7 @@ def create_password():
 @app.route("/password/all", methods=["GET"])
 @token_required
 def get_all_passwords():
+    conn = connPool.get_connection()
     response = data_utils.get_all_passwords(g.decoded_token["id"], conn)
     return jsonify(response)
 
@@ -138,6 +146,7 @@ def delete_password(pass_id):
             "status": "error",
             "response": "Please provide the password id"
         }), 400
+    conn = connPool.get_connection()
     response = data_utils.delete_password(pass_id, g.decoded_token["id"], conn)
     return jsonify(response)
 
@@ -150,6 +159,7 @@ def get_password(pass_id):
             "status": "error",
             "response": "Please provide the password id"
         }), 400
+    conn = connPool.get_connection()
     response = data_utils.get_password(pass_id, g.decoded_token["id"], conn)
     return jsonify(response)
 
@@ -172,6 +182,7 @@ def update_password():
         "url": data["url"],
         "user_id": g.decoded_token["id"]
     }
+    conn = connPool.get_connection()
     response = data_utils.update_password(data, conn)
     return jsonify(response)
 

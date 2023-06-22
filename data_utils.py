@@ -1,12 +1,15 @@
 import datetime
-import json
+import os
 
 import bcrypt
 import jwt
+from dotenv import load_dotenv
 from mysql.connector import IntegrityError
 from nanoid import generate
 
-JWT_SECRET = "dahkdh2ui82ry7wfyudshsdi7utrdfhg6ytefdfghui84reto8i765te"
+load_dotenv()
+
+JWT_SECRET = os.getenv("JWT_SECRET")
 
 
 def hashed_password(password):
@@ -50,6 +53,7 @@ def update_master_key(key, user_id, conn):
         }
     finally:
         cur.close()
+        conn.close()
 
 
 def create_user(data, conn):
@@ -80,6 +84,7 @@ def create_user(data, conn):
         }
     finally:
         cur.close()
+        conn.close()
 
 
 def create_password(data, conn):
@@ -106,6 +111,7 @@ def create_password(data, conn):
         }
     finally:
         cur.close()
+        conn.close()
 
 
 def get_all_passwords(user_id, conn):
@@ -114,6 +120,7 @@ def get_all_passwords(user_id, conn):
     cur.execute(select_query, (user_id,))
     passwords = cur.fetchall()
     cur.close()
+    conn.close()
     transformed_result = []
     for i in passwords:
         transformed_result.append({
@@ -135,6 +142,7 @@ def delete_password(password_id, user_id, conn):
     cur.execute(delete_query, (password_id, user_id))
     conn.commit()
     cur.close()
+    conn.close()
     return {
         "status": "success",
         "message": "Password deleted successfully",
@@ -149,6 +157,7 @@ def update_password(data, conn):
                 data['username'], data['password'], data['id'], data['user_id']))
     conn.commit()
     cur.close()
+    conn.close()
     return {
         "status": "success",
         "message": "Password updated successfully",
@@ -162,6 +171,7 @@ def get_password(password_id, user_id, conn):
     cur.execute(select_query, (password_id, user_id))
     password = cur.fetchone()
     cur.close()
+    conn.close()
     if password:
         return {
             "status": "success",
@@ -189,6 +199,7 @@ def login_user(data, conn):
     cur.execute(select_query, (data['email'],))
     user = cur.fetchone()
     cur.close()
+    conn.close()
     if user:
         if check_password(data['password'], user[3]) and check_password(data['master_key'], user[5]):
             token = generate_token(user[1], user[0], user[2])
