@@ -1,11 +1,16 @@
-import mysql.connector as mysql
+import os
 
+import mysql.connector as mysql
+from dotenv import load_dotenv
+
+load_dotenv()
 conn = mysql.connect(
-    host="localhost",
-    port=3306,
-    user="root",
-    password="password",
-    database="password_manager"
+    port=4000,
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME"),
+    ssl_ca="/etc/ssl/cert.pem"
 )
 
 cursor = conn.cursor()

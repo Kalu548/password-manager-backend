@@ -20,7 +20,10 @@ connPool = mysql.pooling.MySQLConnectionPool(
     user=os.getenv("DB_USER"),
     password=os.getenv("DB_PASSWORD"),
     database=os.getenv("DB_NAME"),
-    ssl_ca="/etc/ssl/cert.pem"
+    ssl_ca="/etc/ssl/cert.pem",
+    pool_name="myPool",
+    port=4000,
+    pool_size=20,
 )
 
 
