@@ -167,7 +167,7 @@ def get_password(pass_id):
     return jsonify(response)
 
 
-@app.route("/password/update/", methods=["POST"])
+@app.route("/password/update", methods=["POST"])
 @token_required
 def update_password():
     data = request.get_json()
