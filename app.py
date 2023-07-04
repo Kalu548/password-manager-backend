@@ -14,6 +14,7 @@ load_dotenv()
 JWT_SECRET = os.getenv("JWT_SECRET")
 app = Flask(__name__)
 CORS(app)
+
 app.static_folder = 'assets'
 
 
