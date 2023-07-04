@@ -4,7 +4,7 @@ from functools import wraps
 import jwt
 import mysql.connector as mysql
 from dotenv import load_dotenv
-from flask import Flask, g, jsonify, request
+from flask import Flask, g, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 import data_utils
@@ -14,9 +14,6 @@ load_dotenv()
 JWT_SECRET = os.getenv("JWT_SECRET")
 app = Flask(__name__)
 CORS(app)
-
-app.static_folder = 'assets'
-
 
 connPool = mysql.pooling.MySQLConnectionPool(
     host=os.getenv("DB_HOST"),
@@ -56,6 +53,11 @@ def index():
     return jsonify({
         "response": "Hello World"
     })
+
+
+@app.route('/assets/<path:path>')
+def send_files(path):
+    return send_from_directory('assets', path)
 
 
 @app.route("/password/export_all", methods=["GET"])
