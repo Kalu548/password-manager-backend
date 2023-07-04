@@ -63,7 +63,7 @@ def create_user(data, conn):
     user_id = generate()
     password = hashed_password(data['password'])
     user_data = (user_id, data['username'], data['email'], password,
-                 "https://cdn.discordapp.com/attachments/831374767482601482/1026764141769273435/unknown.png")
+                 "")
     try:
         cur.execute(insert_query, user_data)
         conn.commit()
