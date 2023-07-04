@@ -13,8 +13,10 @@ load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 app = Flask(__name__)
-
 CORS(app)
+app.static_folder = 'assets'
+
+
 connPool = mysql.pooling.MySQLConnectionPool(
     host=os.getenv("DB_HOST"),
     user=os.getenv("DB_USER"),
@@ -53,6 +55,21 @@ def index():
     return jsonify({
         "response": "Hello World"
     })
+
+
+@app.route("/password/export_all", methods=["GET"])
+@token_required
+def export_all_passwords():
+    master_key = request.args.get("master_key")
+    if master_key is None:
+        return jsonify({
+            "status": "error",
+            "response": "Please provide master key"
+        }), 400
+    user_id = g.decoded_token["id"]
+    conn = connPool.get_connection()
+    response = data_utils.export_all_passwords(master_key, user_id, conn)
+    return jsonify(response)
 
 
 @app.route("/user/create", methods=["POST"])

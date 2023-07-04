@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from mysql.connector import IntegrityError
 from nanoid import generate
 
+import encryption
+
 load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -29,6 +31,37 @@ def generate_token(username, user_id, email):
         "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7)
     }, JWT_SECRET, algorithm="HS256")
     return token
+
+
+def export_all_passwords(master_key, user_id, conn):
+    cur = conn.cursor()
+    select_query = "SELECT * FROM passwords WHERE user_id = %s"
+    cur.execute(select_query, (user_id,))
+    passwords = cur.fetchall()
+    cur.close()
+    conn.close()
+    transformed_result = []
+    for i in passwords:
+        decrypted_password = encryption.return_decrypted_password(
+            i[3], master_key)
+        transformed_result.append(
+            (i[0], i[1], i[2], decrypted_password, i[4], i[5]))
+
+    random_id = generate()
+    filename = f"assets/download/{random_id}passwords_{user_id}.csv"
+    with open(filename, mode="w") as file:
+        header = "Id,Name,Username,Password,Url,Created_at\n"
+        file.write(header)
+        for i in transformed_result:
+            data = ",".join(str(item) for item in i) + "\n"
+            file.write(data)
+    return {
+        "status": "success",
+        "message": "Passwords exported successfully",
+        "data": {
+            "download_url": filename
+        }
+    }
 
 
 def update_master_key(key, user_id, conn):
@@ -212,7 +245,7 @@ def login_user(data, conn):
             }
         return {
             "status": "error",
-            "message": "Invalid password",
+            "message": "Invalid password or Master key",
             "data": None
         }
     return {
