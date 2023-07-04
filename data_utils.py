@@ -49,8 +49,8 @@ def export_all_passwords(master_key, user_id, conn):
 
     filename = f"assets/download/passwords_{user_id}.csv"
 
-    file = open(filename, "w")
-    file.close()
+    f = open(filename, "w")
+    f.close()
 
     with open(filename, mode="w") as file:
         header = "Id,Name,Username,Password,Url,Created_at\n"
