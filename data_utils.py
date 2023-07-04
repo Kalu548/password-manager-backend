@@ -47,8 +47,11 @@ def export_all_passwords(master_key, user_id, conn):
         transformed_result.append(
             (i[0], i[1], i[2], decrypted_password, i[4], i[5]))
 
-    random_id = generate()
-    filename = f"assets/download/{random_id}passwords_{user_id}.csv"
+    filename = f"assets/download/passwords_{user_id}.csv"
+
+    file = open(filename, "w")
+    file.close()
+
     with open(filename, mode="w") as file:
         header = "Id,Name,Username,Password,Url,Created_at\n"
         file.write(header)
