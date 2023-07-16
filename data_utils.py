@@ -1,6 +1,7 @@
+import csv
 import datetime
 import os
-import os
+
 import bcrypt
 import jwt
 from dotenv import load_dotenv
@@ -45,17 +46,17 @@ def export_all_passwords(master_key, user_id, conn):
         decrypted_password = encryption.return_decrypted_password(
             i[3], master_key)
         transformed_result.append(
-            (i[0], i[1], i[2], decrypted_password, i[4], i[5]))
+            [i[0], i[1], i[2], decrypted_password, i[4], i[5]])
 
     filename = f"assets/download/passwords_{user_id}.csv"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
-    
+
     with open(filename, mode="w") as file:
-        header = "Id,Name,Username,Password,Url,Created_at\n"
-        file.write(header)
-        for i in transformed_result:
-            data = ",".join(str(item) for item in i) + "\n"
-            file.write(data)
+        writer = csv.writer(file)
+        writer.writerow(["Id", "Name", "Username",
+                        "Password", "Url", "Created At"])
+        writer.writerows(transformed_result)
+
     return {
         "status": "success",
         "message": "Passwords exported successfully",
