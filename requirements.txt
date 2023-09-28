@@ -1,0 +1,7 @@
+mysql-connector-python
+Flask
+bcrypt
+flask-cors
+cryptography
+PyJWT
+cuid2
