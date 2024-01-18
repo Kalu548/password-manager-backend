@@ -13,7 +13,7 @@ load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 app = Flask(__name__)
-CORS(app, origins=["https://password-manager.pages.dev", "http://localhost:3000", "http://localhost:8000"])
+CORS(app)
 
 connPool = mysql.pooling.MySQLConnectionPool(
     host=os.getenv("DB_HOST"),
