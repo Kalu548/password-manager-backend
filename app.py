@@ -13,7 +13,7 @@ load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["*"])
 
 connPool = mysql.pooling.MySQLConnectionPool(
     host=os.getenv("DB_HOST"),
