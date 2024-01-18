@@ -1,7 +1,7 @@
 from mysql.connector import IntegrityError
 
 from utils.db import create_db_connection
-from utils.utilities import decrypt_password, generate_id
+from utils.utilities import decrypt_password, generate_id, generate_password_hash
 
 
 def create_password(user_id, name, url, username, password):
