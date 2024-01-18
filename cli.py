@@ -1,5 +1,4 @@
-from utils import user, utilities, password
-import utils 
+from utils import user, utilities, password as password_manager
 from prettytable import PrettyTable
 import csv 
 from halo import Halo
@@ -25,17 +24,16 @@ menu = """
 USER_ID = ""
 MASTER_KEY = ""
 
-def get_decrypted_password_data(user_id, master_key):
-    try:
-        password_info = password.get_password(password_id, user_id)
-        password_info["password"] = utilities.decrypt_password(password_info["password"], master_key)
-        return password_info
-    except Exception as e:
-        print("Password Does not exist")
+def get_decrypted_password_data(password_id, user_id, master_key):
+    password_info = password_manager.get_password(password_id, user_id)
+    print
+    password_info["password"] = utilities.decrypt_password(password_info["password"], master_key)
+    return password_info
+
 
 def print_password(password_info):
     if password_info:
-        table = PrettyTable
+        table = PrettyTable()
         table.field_names = ["Id", "Name", "Username", "Password", "URL", "Created At"]
         table.add_row([password_info["id"], password_info["name"], password_info["username"], password_info["password"], password_info["url"], password_info["created_at"]])
         print(table)
@@ -43,7 +41,6 @@ def print_password(password_info):
 
 print(menu)
 while True:
-    print(USER_ID, MASTER_KEY)
     command = input("Enter a command: ")
     if command == "register":
         email = input("Enter your email: ")
@@ -92,7 +89,7 @@ while True:
         table.field_names = ["Id", "Name", "Username", "URL", "Created At"]
         spinner = Halo(text='Retrieving passwords', spinner='dots')
         spinner.start()
-        user_passwords = password.get_all_passwords(USER_ID)
+        user_passwords = password_manager.get_all_passwords(USER_ID)
         if len(user_passwords) == 0:
             spinner.warn(text="You do not have any passwords saved")
         else:
@@ -109,7 +106,8 @@ while True:
         spinner = Halo(text='Creating password', spinner='dots')
         spinner.start()
         try:
-            password_id = password.create_password(USER_ID, name, url, username, user_password)
+            hashed_password = utilities.encrypt_password(user_password, MASTER_KEY)
+            password_id = password_manager.create_password(USER_ID, name, url, username, hashed_password)
             spinner.succeed("Password created successfully")
             print("Password id: ", password_id)
         except Exception as e:
@@ -117,7 +115,9 @@ while True:
 
     elif command == "show_password":
         password_id = input("Enter the password id: ")
-        password_data = get_decrypted_password_data(USER_ID, MASTER_KEY)
+        spinner = Halo(text='Retrieving password', spinner='dots')
+        password_data = get_decrypted_password_data(password_id, USER_ID, MASTER_KEY)
+        spinner.succeed("Successfully retrieved password")
         print_password(password_data)
 
     
@@ -126,8 +126,8 @@ while True:
         conifrmation = input("Are you sure you want to delete this password? (y/n): ")
         spinner = Halo(text='Deleting password', spinner='dots')
         spinner.start()
-        if conifrmation.lower() != "y":
-            if password.delete_password(password_id, USER_ID):
+        if conifrmation.lower() == "y":
+            if password_manager.delete_password(password_id, USER_ID):
                 spinner.succeed("Password deleted successfully")
             else:
                 spinner.fail("Password does not exist")
@@ -136,7 +136,7 @@ while True:
 
     elif command == "update_password":
         password_id = input("Enter the password id: ")
-        password_data = get_decrypted_password_data(USER_ID, MASTER_KEY)
+        password_data = get_decrypted_password_data(password_id, USER_ID, MASTER_KEY)
         print_password(password_data)
         field = input("Enter the field you want to update (name, username, password, url):  ")
         if field not in ["name" , "username" , "password" , "url" ]:
@@ -146,23 +146,23 @@ while True:
             spinner = Halo(text='Updating password', spinner='dots')
             spinner.start()
             password_data[field] = changed_value
-            encrypted_password = utilities.encrypt_password(password_data["password"])
+            encrypted_password = utilities.encrypt_password(password_data["password"], MASTER_KEY)
             try:
-                password.update_password(password_id, password_data["name"], password_data["username"], encrypted_password, password_data["url"])
+                password_manager.update_password(password_id, password_data["name"], password_data["username"], encrypted_password, password_data["url"])
                 spinner.succeed("Password updated successfully")
             except Exception as e:
                 spinner.fail("Password does not exist" , e)
 
     elif command == "export":
-        passwords = password.user_password_list(USER_ID, MASTER_KEY)
+        passwords = password_manager.user_password_list(USER_ID, MASTER_KEY)
         spinner = Halo(text='Exporting passwords', spinner='dots')
         spinner.start()
         with open("saved_passwords.csv", mode="w") as file:
             writer = csv.writer(file)
             writer.writerow(["Id", "Name", "Username", "Password", "Url", "Created At"])
-            writer.writerows(passwords)
+            for i in passwords:
+                writer.writerow([i["id"], i["name"], i["username"], i["password"], i["url"], i["created_at"]])
         spinner.succeed("Passwords exported successfully")
 
     elif command == "exit":
         break
-    print()
